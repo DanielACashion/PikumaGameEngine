@@ -7,6 +7,7 @@ class Game {
   bool _should_run = false;
   SDL_Window *window;
   SDL_Renderer *renderer;
+  SDL_Texture *tank_texture;
   void ProcessInput();
   void Update();
   void Render();

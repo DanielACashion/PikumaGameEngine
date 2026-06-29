@@ -39,6 +39,7 @@ void Game::Initialize() {
   }
   // SDL_SetWindowFullscreen(this->window, SDL_WINDOW_FULLSCREEN);
   this->_should_run = true;
+  SetUp();
 }
 
 void Game::Run() {
@@ -57,6 +58,10 @@ void Game::Destroy() {
   if (this->window) {
     SDL_DestroyWindow(this->window);
     this->window = nullptr;
+  }
+  if (this->tank_texture) {
+    SDL_DestroyTexture(this->tank_texture);
+    this->tank_texture = nullptr;
   }
   SDL_Quit();
 }
@@ -80,26 +85,30 @@ void Game::ProcessInput() {
 
 void Game::Update() {}
 
+void Game::SetUp() {
+  SDL_Surface *surface = IMG_Load("./assets/images/tank-tiger-right.png");
+  if (!surface) {
+    std::cout << "failed to loadimage \n";
+  }
+  this->tank_texture = SDL_CreateTextureFromSurface(this->renderer, surface);
+  SDL_FreeSurface(surface);
+  surface = nullptr;
+  if (!this->tank_texture) {
+    this->_should_run = false;
+  }
+}
+
 void Game::Render() {
 
   SDL_SetRenderDrawColor(this->renderer, 21, 21, 21, 255);
   SDL_RenderClear(this->renderer);
   //
-  SDL_Surface *surface = IMG_Load("./assets/images/tank-tiger-right.png");
-  if (!surface) {
-    std::cout << "failed to loadimage \n";
-  }
-  SDL_Texture *texture = SDL_CreateTextureFromSurface(this->renderer, surface);
-  SDL_FreeSurface(surface);
-  surface = nullptr;
-  SDL_Rect tank_rect = {.x = 50, .y = 50, .w = 32, .h = 32};
 
+  SDL_Rect tank_rect = {.x = 50, .y = 50, .w = 32, .h = 32};
   SDL_Rect player = {.x = 10, .y = 10, .w = 20, .h = 20};
-  //   SDL_SetRenderDrawColor(this->renderer, 255, 0, 0, 255);
-  //   SDL_RenderFillRect(this->renderer, &player);
-  SDL_RenderCopy(this->renderer, texture, NULL, &tank_rect);
-  SDL_DestroyTexture(texture);
-  texture = nullptr;
+  SDL_SetRenderDrawColor(this->renderer, 255, 0, 0, 255);
+  SDL_RenderFillRect(this->renderer, &player);
+  SDL_RenderCopy(this->renderer, this->tank_texture, NULL, &tank_rect);
 
   SDL_RenderPresent(this->renderer);
 }

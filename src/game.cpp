@@ -1,9 +1,12 @@
 #include "game.h"
 #include "SDL2/SDL_events.h"
 #include "SDL2/SDL_keycode.h"
+#include "SDL2/SDL_rect.h"
 #include "SDL2/SDL_render.h"
+#include "SDL2/SDL_surface.h"
 #include "SDL2/SDL_video.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <cstddef>
 #include <iostream>
 
@@ -37,6 +40,7 @@ void Game::Initialize() {
   // SDL_SetWindowFullscreen(this->window, SDL_WINDOW_FULLSCREEN);
   this->_should_run = true;
 }
+
 void Game::Run() {
   while (this->_should_run) {
     ProcessInput();
@@ -44,6 +48,19 @@ void Game::Run() {
     Render();
   }
 }
+
+void Game::Destroy() {
+  if (this->renderer) {
+    SDL_DestroyRenderer(this->renderer);
+    this->renderer = nullptr;
+  }
+  if (this->window) {
+    SDL_DestroyWindow(this->window);
+    this->window = nullptr;
+  }
+  SDL_Quit();
+}
+
 void Game::ProcessInput() {
   SDL_Event event;
   SDL_PollEvent(&event);
@@ -60,18 +77,29 @@ void Game::ProcessInput() {
     break;
   }
 }
+
 void Game::Update() {}
+
 void Game::Render() {
-  SDL_SetRenderDrawColor(this->renderer, 255, 0, 0, 255);
+
+  SDL_SetRenderDrawColor(this->renderer, 21, 21, 21, 255);
   SDL_RenderClear(this->renderer);
+  //
+  SDL_Surface *surface = IMG_Load("./assets/images/tank-tiger-right.png");
+  if (!surface) {
+    std::cout << "failed to loadimage \n";
+  }
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(this->renderer, surface);
+  SDL_FreeSurface(surface);
+  surface = nullptr;
+  SDL_Rect tank_rect = {.x = 50, .y = 50, .w = 32, .h = 32};
+
+  SDL_Rect player = {.x = 10, .y = 10, .w = 20, .h = 20};
+  //   SDL_SetRenderDrawColor(this->renderer, 255, 0, 0, 255);
+  //   SDL_RenderFillRect(this->renderer, &player);
+  SDL_RenderCopy(this->renderer, texture, NULL, &tank_rect);
+  SDL_DestroyTexture(texture);
+  texture = nullptr;
+
   SDL_RenderPresent(this->renderer);
-}
-void Game::Destroy() {
-  if (this->renderer) {
-    SDL_DestroyRenderer(this->renderer);
-  }
-  if (this->window) {
-    SDL_DestroyWindow(this->window);
-  }
-  SDL_Quit();
 }

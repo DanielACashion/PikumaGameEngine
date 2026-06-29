@@ -10,6 +10,7 @@ class Game {
   void ProcessInput();
   void Update();
   void Render();
+  void SetUp();
 
 public:
   int window_width = 800;

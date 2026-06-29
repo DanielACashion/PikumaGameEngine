@@ -29,4 +29,5 @@ void Logger::Error(const std::string &message) {
   entry.type = LogType::ERROR;
   entry.message = "\e[0;31mERR | " + NowAsString() + " - " + message + "\n";
   std::cout << entry.message;
+  messages.push_back(entry);
 }

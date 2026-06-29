@@ -1,5 +1,5 @@
 #include "game.h"
-#include "Logger.h"
+#include "../Logger/Logger.h"
 #include "SDL2/SDL_events.h"
 #include "SDL2/SDL_keycode.h"
 #include "SDL2/SDL_rect.h"

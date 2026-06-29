@@ -4,11 +4,17 @@
 #include "SDL2/SDL_rect.h"
 #include "SDL2/SDL_render.h"
 #include "SDL2/SDL_surface.h"
+#include "SDL2/SDL_timer.h"
 #include "SDL2/SDL_video.h"
+#include "glm/ext/vector_float2.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <cstddef>
+#include <glm/glm.hpp>
 #include <iostream>
+
+glm::vec2 playerPosition;
+glm::vec2 playerVelocity;
 
 Game::Game() { std::cout << "Game contstructor was called \n"; }
 Game::~Game() { std::cout << "Game destructor was called \n"; }
@@ -83,7 +89,19 @@ void Game::ProcessInput() {
   }
 }
 
-void Game::Update() {}
+int millisecs_previous_frame = 0;
+void Game::Update() {
+  int timeToWait =
+      MILLISECS_PER_FRAME - (SDL_GetTicks() - millisecs_previous_frame);
+  if (timeToWait > 0 && timeToWait <= MILLISECS_PER_FRAME) {
+    return;
+  }
+  double delta_time =
+      ((double)SDL_GetTicks() - (double)millisecs_previous_frame) / 1000.0f;
+  millisecs_previous_frame = SDL_GetTicks();
+  playerPosition.x += (playerVelocity.x * delta_time);
+  playerPosition.y += (playerVelocity.y * delta_time);
+}
 
 void Game::SetUp() {
   SDL_Surface *surface = IMG_Load("./assets/images/tank-tiger-right.png");
@@ -96,6 +114,10 @@ void Game::SetUp() {
   if (!this->tank_texture) {
     this->_should_run = false;
   }
+  playerPosition = glm::vec2(10.0, 20.0);
+  playerVelocity = glm::vec2(100.0, 0.0);
+  millisecs_previous_frame = SDL_GetTicks();
+  millisecs_previous_frame = SDL_GetTicks();
 }
 
 void Game::Render() {
@@ -103,8 +125,10 @@ void Game::Render() {
   SDL_SetRenderDrawColor(this->renderer, 21, 21, 21, 255);
   SDL_RenderClear(this->renderer);
   //
-
-  SDL_Rect tank_rect = {.x = 50, .y = 50, .w = 32, .h = 32};
+  SDL_Rect tank_rect = {.x = static_cast<int>(playerPosition.x),
+                        .y = static_cast<int>(playerPosition.y),
+                        .w = 32,
+                        .h = 32};
   SDL_Rect player = {.x = 10, .y = 10, .w = 20, .h = 20};
   SDL_SetRenderDrawColor(this->renderer, 255, 0, 0, 255);
   SDL_RenderFillRect(this->renderer, &player);

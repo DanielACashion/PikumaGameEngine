@@ -3,6 +3,9 @@
 
 #include "SDL2/SDL_render.h"
 #include "SDL2/SDL_video.h"
+const int FPS = 60;
+const int MILLISECS_PER_FRAME = 1000 / FPS;
+
 class Game {
   bool _should_run = false;
   SDL_Window *window;

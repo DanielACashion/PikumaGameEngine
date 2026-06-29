@@ -1,4 +1,5 @@
 #include "game.h"
+#include "Logger.h"
 #include "SDL2/SDL_events.h"
 #include "SDL2/SDL_keycode.h"
 #include "SDL2/SDL_rect.h"
@@ -11,17 +12,16 @@
 #include <SDL2/SDL_image.h>
 #include <cstddef>
 #include <glm/glm.hpp>
-#include <iostream>
 
 glm::vec2 playerPosition;
 glm::vec2 playerVelocity;
 
-Game::Game() { std::cout << "Game contstructor was called \n"; }
-Game::~Game() { std::cout << "Game destructor was called \n"; }
+Game::Game() { Logger::Log("Game contstructor was called"); }
+Game::~Game() { Logger::Log("Game destructor was called"); }
 void Game::Initialize() {
   int init_response = SDL_Init(SDL_INIT_EVERYTHING);
   if (init_response < 0) {
-    std::cout << "failed to init sdl\n";
+    Logger::Error("failed to init sdl\n");
     this->_should_run = false;
     return;
   }
@@ -34,13 +34,13 @@ void Game::Initialize() {
                                   this->window_height, SDL_WINDOW_BORDERLESS);
   if (!this->window) {
     this->_should_run = false;
-    std::cout << "failed to setup window\n";
+    Logger::Error("failed to setup window");
     return;
   }
   this->renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
   if (!this->renderer) {
     this->_should_run = false;
-    std::cout << "failed to setup renderer\n";
+    Logger::Error("failed to setup renderer");
     return;
   }
   // SDL_SetWindowFullscreen(this->window, SDL_WINDOW_FULLSCREEN);
@@ -106,13 +106,14 @@ void Game::Update() {
 void Game::SetUp() {
   SDL_Surface *surface = IMG_Load("./assets/images/tank-tiger-right.png");
   if (!surface) {
-    std::cout << "failed to loadimage \n";
+    Logger::Error("failed to loadimage");
   }
   this->tank_texture = SDL_CreateTextureFromSurface(this->renderer, surface);
   SDL_FreeSurface(surface);
   surface = nullptr;
   if (!this->tank_texture) {
     this->_should_run = false;
+    Logger::Error("Failed to move tank texture from surface to texture");
   }
   playerPosition = glm::vec2(10.0, 20.0);
   playerVelocity = glm::vec2(100.0, 0.0);

@@ -5,7 +5,6 @@
 #include <SDL2/SDL_ttf.h>
 #include <glm/glm.hpp>
 #include <imgui/imgui.h>
-#include <iostream>
 #include <sol/sol.hpp>
 
 int main(int argc, char *argv[]) {

@@ -1,4 +1,5 @@
 #include "game.h"
+#include "../ECS/ECS.h"
 #include "../Logger/Logger.h"
 #include "SDL2/SDL_events.h"
 #include "SDL2/SDL_keycode.h"
@@ -18,6 +19,8 @@ glm::vec2 playerVelocity;
 
 Game::Game() { Logger::Log("Game contstructor was called"); }
 Game::~Game() { Logger::Log("Game destructor was called"); }
+
+// START PUBLICS
 void Game::Initialize() {
   int init_response = SDL_Init(SDL_INIT_EVERYTHING);
   if (init_response < 0) {
@@ -71,6 +74,7 @@ void Game::Destroy() {
   }
   SDL_Quit();
 }
+// END PUBLICS
 
 void Game::ProcessInput() {
   SDL_Event event;
@@ -104,6 +108,10 @@ void Game::Update() {
 }
 
 void Game::SetUp() {
+  // load startup
+  playerPosition = glm::vec2(10.0, 20.0);
+  playerVelocity = glm::vec2(100.0, 0.0);
+
   SDL_Surface *surface = IMG_Load("./assets/images/tank-tiger-right.png");
   if (!surface) {
     Logger::Error("failed to loadimage");
@@ -115,16 +123,15 @@ void Game::SetUp() {
     this->_should_run = false;
     Logger::Error("Failed to move tank texture from surface to texture");
   }
-  playerPosition = glm::vec2(10.0, 20.0);
-  playerVelocity = glm::vec2(100.0, 0.0);
-  millisecs_previous_frame = SDL_GetTicks();
-  millisecs_previous_frame = SDL_GetTicks();
+
+  millisecs_previous_frame = SDL_GetTicks(); // this should be last
 }
 
 void Game::Render() {
 
   SDL_SetRenderDrawColor(this->renderer, 21, 21, 21, 255);
   SDL_RenderClear(this->renderer);
+
   //
   SDL_Rect tank_rect = {.x = static_cast<int>(playerPosition.x),
                         .y = static_cast<int>(playerPosition.y),
@@ -134,6 +141,7 @@ void Game::Render() {
   SDL_SetRenderDrawColor(this->renderer, 255, 0, 0, 255);
   SDL_RenderFillRect(this->renderer, &player);
   SDL_RenderCopy(this->renderer, this->tank_texture, NULL, &tank_rect);
+  //
 
   SDL_RenderPresent(this->renderer);
 }

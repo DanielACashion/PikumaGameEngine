@@ -4,9 +4,13 @@
 #include <iterator>
 #include <string>
 #include <vector>
+
+/////////////////////////////
 // Popular Logging Libraries
 // gabime/spdlog
 // rxi/log.c
+////////////////////////////
+
 std::vector<LogEntry> Logger::messages;
 std::string NowAsString() {
   std::time_t now = std::time({});

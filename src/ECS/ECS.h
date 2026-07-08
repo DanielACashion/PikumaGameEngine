@@ -1,8 +1,11 @@
 #ifndef ECS_H
 #define ECS_H
 
+#include "../Logger/Logger.h"
 #include <bitset>
-#include <iostream>
+#include <set>
+#include <typeindex>
+#include <unordered_map>
 #include <vector>
 
 class IComponent {
@@ -12,7 +15,7 @@ protected:
 
 template <typename T> class Component : IComponent {
 public:
-  Component(const Component &Component) { std::cout << "Copy was called"; }
+  Component(const Component &Component) { Logger::Log("Copy was called"); }
   static int GetId() {
     static auto id = nextId++;
     return id;
@@ -51,9 +54,51 @@ public:
   //
   template <typename T> void RequireComponent();
 };
+class IPool {
+  //
+public:
+  virtual ~IPool() {};
+};
+
+template <typename T> class Pool : IPool {
+  std::vector<T> data;
+
+public:
+  Pool(int size = 100) { this->data.resize(size); }
+  ~Pool() = default;
+
+  bool isEmpty() const { return this->data.empty(); }
+
+  int GetSize() const { return this->data.size(); }
+
+  void Resize(int size) { this->data.resize(size); }
+
+  void Clear() { this->data.clear(); }
+
+  void Add(T object) { this->data.push_back(object); }
+
+  void Set(int index, T object) { data[index] = object; }
+
+  T &Get(int index) const { return static_cast<T>(this->data[index]); }
+
+  T &operator[](unsigned int index) const { return this->data[index]; }
+};
 
 class Registry {
-  //
+  int numEntities = 0;
+  // each pool contains all the data for a comp type
+  std::vector<IPool *> _componentPools;
+  std::vector<Signature> _entitiyComponentSignatures;
+  std::unordered_map<std::type_index, System *> _systems;
+  std::set<Entity> entitiesToBeAdded;
+  std::set<Entity> entitiesToBeKilled;
+
+  void Update();
+
+public:
+  Registry() = default;
+  Entity CreateEntity();
+  void KillEntity(Entity entity);
 };
 
 template <typename TComponent> void System::RequireComponent() {

@@ -30,7 +30,9 @@ public:
   int GetId() const;
   Entity &operator=(const Entity &other) = default;
   bool operator==(const Entity &other) const { return this->_id == other._id; };
-  bool operator!=(const Entity &other) const { return this->_id != other._id; }
+  bool operator!=(const Entity &other) const { return this->_id != other._id; };
+  bool operator<(const Entity &other) const { return this->_id < other._id; };
+  bool operator>(const Entity &other) const { return this->_id > other._id; };
 };
 
 //////////////////////
@@ -85,20 +87,28 @@ public:
 };
 
 class Registry {
-  int numEntities = 0;
+  int _numEntities = 0;
   // each pool contains all the data for a comp type
   std::vector<IPool *> _componentPools;
-  std::vector<Signature> _entitiyComponentSignatures;
+  std::vector<Signature> _entityComponentSignatures;
   std::unordered_map<std::type_index, System *> _systems;
-  std::set<Entity> entitiesToBeAdded;
-  std::set<Entity> entitiesToBeKilled;
+  std::set<Entity> _entitiesToBeAdded;
+  std::set<Entity> _entitiesToBeKilled;
 
   void Update();
+  template <typename TComponent> bool HasComponent(Entity entity);
 
 public:
   Registry() = default;
   Entity CreateEntity();
+  void AddEntityToSystem(Entity entity);
   void KillEntity(Entity entity);
+
+  // AddComponent();
+  template <typename TComponent, typename... TArgs>
+  void AddComponent(Entity entity, TArgs &&...args);
+
+  template <typename TComponent> void RemoveComponent(Entity entity);
 };
 
 template <typename TComponent> void System::RequireComponent() {

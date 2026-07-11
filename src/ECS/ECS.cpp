@@ -1,6 +1,7 @@
 #include "ECS.h"
 #include <algorithm>
 #include <string>
+#include <typeindex>
 #include <utility>
 
 int IComponent::nextId = 0;
@@ -76,4 +77,39 @@ template <typename TComponent> void Registry::RemoveComponent(Entity entity) {
   const auto entityId = entity.GetId();
 
   this->_entityComponentSignatures[entityId].set(componentId, false);
+};
+
+template <typename TSystem, typename... TArgs>
+void Registry::AddSystem(TArgs &&...args) {
+  TSystem *system(new TSystem(std::forward<TArgs>(args)...));
+  this->_systems.insert(
+      std::make_pair(std::type_index(typeid(TSystem)), system));
+}
+
+template <typename TSystem> void Registry::RemoveSystem() {
+  const auto system = this->_systems.find(std::type_index(typeid(TSystem)));
+  this->_systems.erase(system);
+}
+
+template <typename TSystem> bool Registry::HasSystem() const {
+  return this->_systems.find(std::type_index(typeid(TSystem))) !=
+         this->_systems.end();
+}
+template <typename TSystem> TSystem &Registry::GetSystem() const {
+  auto system = this->_systems.find(std::type_index(typeid(TSystem)));
+  return *(std::static_pointer_cast<TSystem>(system->second));
+}
+void Registry::AddEntityToSystem(Entity entity) {
+  const auto entityId = entity.GetId();
+  const auto &entityComponentSignature =
+      this->_entityComponentSignatures[entityId];
+  for (auto &system : this->_systems) {
+    const auto &systemComponentSignature =
+        system.second->GetComponentSignature();
+    bool isInterested = (entityComponentSignature & systemComponentSignature) ==
+                        systemComponentSignature;
+    if (isInterested) {
+      system.second->AddEntityToSystem(entity);
+    }
+  }
 };

@@ -101,14 +101,21 @@ class Registry {
 public:
   Registry() = default;
   Entity CreateEntity();
-  void AddEntityToSystem(Entity entity);
   void KillEntity(Entity entity);
 
-  // AddComponent();
+  // Component
   template <typename TComponent, typename... TArgs>
   void AddComponent(Entity entity, TArgs &&...args);
-
   template <typename TComponent> void RemoveComponent(Entity entity);
+
+  // Systems
+  template <typename TSystem, typename... TArgs>
+  void AddSystem(TArgs &&...args);
+  template <typename TSystem> void RemoveSystem();
+  template <typename TSystem> bool HasSystem() const;
+  template <typename TSystem> TSystem &GetSystem() const;
+
+  void AddEntityToSystem(Entity entity);
 };
 
 template <typename TComponent> void System::RequireComponent() {
